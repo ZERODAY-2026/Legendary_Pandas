@@ -7,7 +7,7 @@ exact text span grounding, and escalation constraints.
 from datetime import datetime, timezone
 from enum import Enum
 import re
-from typing import Optional
+from typing import Annotated, Optional
 from pydantic import BaseModel, Field, model_validator
 
 
@@ -62,7 +62,7 @@ class ExtractedDocument(BaseModel):
         description="Assigned source type, strictly immutable"
     )
     file_size_bytes: int = Field(..., gt=0)
-    pages: list[ExtractedPage] = Field(..., min_length=1)
+    pages: Annotated[list[ExtractedPage], Field(min_length=1)]
     full_text: str = Field(..., description="Verbatim concatenated original text")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -91,7 +91,7 @@ class Chunk(BaseModel):
     document_id: str
     source_type: SourceType = SourceType.CONTRACT
     page_number: int = Field(..., ge=1)
-    page_end: Optional[int] = Field(default=None, ge=1)
+    page_end: Annotated[Optional[int], Field(ge=1)] = None
     start_char: int = Field(..., ge=0)
     end_char: int = Field(..., ge=0)
     text: str = Field(..., min_length=1)
