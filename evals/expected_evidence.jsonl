@@ -1,0 +1,5 @@
+{"id": "q001", "expected_status": "sufficient_evidence", "expected_clause": "Clause 4", "keywords": ["$2,000", "security deposit"]}
+{"id": "q002", "expected_status": "sufficient_evidence", "expected_clause": "Clause 8", "keywords": ["60 days", "written notice"]}
+{"id": "q003", "expected_status": "sufficient_evidence", "expected_clause": "Clause 11", "keywords": ["pets", "written consent"]}
+{"id": "q004", "expected_status": "insufficient_evidence", "expected_clause": null, "keywords": []}
+{"id": "q005", "expected_status": "escalation_required", "expected_clause": "Clause 14", "keywords": ["legal counsel", "enforceability"]}

@@ -1,0 +1,5 @@
+{"id": "q001", "contract": "sample_lease_standard.txt", "question": "What is the security deposit amount and when must it be paid?", "category": "deposit"}
+{"id": "q002", "contract": "sample_lease_standard.txt", "question": "How much advance notice is required to terminate the agreement at the end of the term?", "category": "notice"}
+{"id": "q003", "contract": "sample_lease_standard.txt", "question": "Are pets permitted in the apartment?", "category": "pets"}
+{"id": "q004", "contract": "sample_lease_sparse.txt", "question": "What is the procedure for returning the security deposit?", "category": "missing_information"}
+{"id": "q005", "contract": "sample_lease_adversarial.txt", "question": "Is the clause allowing immediate landlord entry without notice enforceable?", "category": "escalation_required"}
