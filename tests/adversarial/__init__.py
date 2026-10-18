@@ -1,1 +1,1 @@
-"""Adversarial and prompt-injection tests package."""
+"""Adversarial and prompt-injection testing package."""

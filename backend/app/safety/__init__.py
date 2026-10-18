@@ -1,1 +1,1 @@
-"""Safety validation package for citation validation, claim checking, and guardrails."""
+"""Deterministic citation verification, claim validation, and response guarding."""

@@ -1,1 +1,1 @@
-"""Storage package for local session management and secure cleanup."""
+"""Local session storage and privacy-compliant data cleanup."""

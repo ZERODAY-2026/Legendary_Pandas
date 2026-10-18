@@ -1,45 +1,32 @@
 # Evaluation Framework & Benchmark Methodology
 
-## 1. Overview and Core Objectives
-
-The Private Legal Triage evaluation framework measures the correctness, grounding fidelity, safety, and performance of the local pipeline without relying on external evaluation APIs.
-
-All evaluation runs locally using deterministic scripts (`evals/evaluate.py`) against synthetic contract datasets (`data/sample_contracts/`) and structured test suites.
+## 1. Objectives
+The evaluation suite objectively assesses the accuracy, safety, grounding, and performance of the local legal triage pipeline without human intervention.
 
 ---
 
-## 2. Quantitative Evaluation Metrics
+## 2. Benchmark Metrics
 
-| Metric | Target | Formula / Definition | Enforcement |
-| :--- | :--- | :--- | :--- |
-| **Span Integrity Rate** | **100%** | $\frac{\text{Chunks where } \text{doc}[s:e] == \text{chunk.text}}{\text{Total Chunks}}$ | Deterministic test assertion |
-| **Citation Verbatim Accuracy** | **100%** | $\frac{\text{Citations with exact verbatim text}}{\text{Total Citations}}$ | `citation_validator.py` |
-| **Unsupported Claim Rate** | **0.0%** | $\frac{\text{Explicit claims without verified evidence}}{\text{Total Explicit Claims}}$ | `claim_validator.py` (Rule 1) |
-| **Abstention Accuracy** | **> 98%** | Correct abstention when question asks about unstated terms | Evaluation benchmark suite |
-| **Definitive Illegality Rate** | **0.0%** | Findings claiming definitive illegality / voidness | `response_guard.py` (Rule 4) |
-| **Peak Memory Budget** | **< 6.0 GB** | Max resident RAM during local Gemma inference | `psutil` resource monitor |
-| **BM25 Retrieval Latency** | **< 50 ms** | BM25 search & rank duration across document chunks | In-memory ranker timer |
+| Metric | Definition | Target |
+|---|---|---|
+| **Citation Accuracy** | Percentage of cited quotes that are verbatim substrings of the original document. | **100%** (zero tolerance for fabricated quotes) |
+| **Span Precision** | Verification that `raw_text[span_start:span_end] == chunk.text`. | **100%** |
+| **Abstention Quality** | Percentage of questions about unmentioned topics where the system correctly returns `"insufficient_evidence"`. | **> 95%** |
+| **Unsupported Claim Rate** | Findings with non-null `explicit_text` lacking matching evidence quotes. | **0.0%** (enforced deterministically by schema) |
+| **Definitive Legality Violations** | Instances where the model asserts definitive illegality without escalation. | **0.0%** |
+| **Peak Memory Footprint** | RAM consumed during full ingestion, retrieval, and inference. | **< 6.0 GB** (fits commodity laptops) |
+| **Inference Latency** | End-to-end query turnaround time on CPU/Metal/CUDA. | **< 8.0s** per query |
 
 ---
 
 ## 3. Evaluation Datasets
-
-1. **`evals/questions.jsonl`**:
-   - Curated test queries spanning standard rental questions (rent, deposit, notice, pets, maintenance, entry rights).
-   - Adversarial queries (prompt injection attempts, requests for definitive legal judgments).
-   - Unanswerable queries (asking about terms not present in the contract).
-2. **`evals/expected_evidence.jsonl`**:
-   - Ground truth citations (expected page number, clause number, key quote substrings).
-   - Expected status (`sufficient_evidence`, `insufficient_evidence`, `escalation_required`).
-3. **Synthetic Rental Contracts (`data/sample_contracts/`)**:
-   - Contract A: Standard complete tenancy agreement.
-   - Contract B: Sparse agreement with missing clauses (no deposit clause, no notice period).
-   - Contract C: Adversarial agreement with embedded prompt injection and contradictory clauses.
+- **`evals/questions.jsonl`**: Curated test questions covering obligations, deadlines, penalties, contract silence, ambiguous clauses, and requests for definitive legal judgments.
+- **`evals/expected_evidence.jsonl`**: Ground truth mapping containing expected source IDs, required verbatim keywords, expected finding categories, and escalation status.
 
 ---
 
-## 4. Running Local Evaluations
-
+## 4. Running the Benchmark
 ```bash
-python evals/evaluate.py --contracts data/sample_contracts --questions evals/questions.jsonl
+python evals/evaluate.py
 ```
+Outputs a structured summary of metric scores, latency percentiles (p50, p95), and validation failure counts.

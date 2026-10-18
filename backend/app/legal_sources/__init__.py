@@ -1,1 +1,1 @@
-"""Legal sources module providing provenance and source-separation boundaries."""
+"""Legal sources registry and provenance tracking boundary."""

@@ -1,1 +1,1 @@
-"""Safety tests package."""
+"""Safety and hallucination prevention tests package."""

@@ -1,61 +1,53 @@
-"""FastAPI application entrypoint for Private Legal Triage.
-
-Binds strictly to 127.0.0.1 and enforces local-only operation.
+"""
+FastAPI Application Entry Point.
+Strictly binds to 127.0.0.1 and enforces local-only privacy standards.
 """
 
 import logging
-from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.app.config import settings
 
-# Configure strict privacy-preserving logger (Never log content or PII)
+# Configure privacy-preserving logging
+# Rule: Never log document text, user questions, names, or model answers
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    format="%(asctime)s [%(levelname)s] [private-legal-triage] %(message)s",
 )
-logger = logging.getLogger("private_legal_triage")
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Application lifespan verifying local-first constraints at startup."""
-    logger.info("Initializing Private Legal Triage System...")
-    logger.info("Local-first mode active. Network binding: %s:%s", settings.HOST, settings.PORT)
-    if settings.HOST != "127.0.0.1":
-        raise RuntimeError("Security violation: Server MUST only bind to 127.0.0.1")
-    yield
-    logger.info("Shutting down Private Legal Triage System.")
-
+logger = logging.getLogger("legal_triage")
 
 app = FastAPI(
-    title="Private Legal Triage",
+    title="Private Legal Triage API",
     description="Local-first, evidence-grounded legal document triage system for rental agreements.",
     version="0.1.0",
-    lifespan=lifespan,
-    docs_url="/docs" if settings.DEBUG else None,
-    redoc_url=None,
 )
 
-# Restrictive CORS: only localhost Vite frontend
+from backend.app.api.endpoints import router as api_router
+
+# Restrictive CORS for local development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_methods=["GET", "POST", "DELETE"],
+    allow_headers=["*"],
 )
+
+app.include_router(api_router)
 
 
 @app.get("/health")
-async def health_check():
-    """Health check endpoint indicating local-only status."""
+def health_check():
     return {
         "status": "healthy",
-        "local_only": settings.LOCAL_ONLY,
-        "runtime": "local_inference",
-        "version": "0.1.0",
+        "mode": "local_first",
+        "cloud_llm_enabled": False,
+        "telemetry_enabled": False,
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    logger.info("Starting local triage server on %s:%s", settings.HOST, settings.PORT)
+    uvicorn.run("backend.app.main:app", host=settings.HOST, port=settings.PORT, reload=False)

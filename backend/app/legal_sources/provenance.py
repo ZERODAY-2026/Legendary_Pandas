@@ -1,45 +1,19 @@
-"""Provenance tracking and validation utilities.
-
-Ensures every evidence citation and claim has verified provenance back to
-an ingested document chunk.
+"""
+Provenance tracking to guarantee that contract text and any external source
+are strictly compartmentalized and never cross-pollinated.
 """
 
-import hashlib
-from typing import Optional
-from backend.app.document.schemas import Chunk, EvidencePassage, SourceType
+from backend.app.document.schemas import Evidence, SourceType
 
 
-def compute_content_hash(text: str) -> str:
-    """Computes SHA-256 hash of text for tamper-detection and provenance."""
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-
-class ProvenanceRecord:
-    """Encapsulates provenance verification for a chunk or evidence passage."""
+class ProvenanceTracker:
+    """Verifies that evidence items maintain strict provenance to their declared source."""
 
     @staticmethod
-    def create_evidence_from_chunk(
-        chunk: Chunk,
-        exact_quote: str,
-        start_char: int,
-        end_char: int,
-        evidence_id: str,
-        relevance_score: Optional[float] = None
-    ) -> EvidencePassage:
-        """Constructs an EvidencePassage strictly inheriting the immutable source_type from chunk."""
-        return EvidencePassage(
-            evidence_id=evidence_id,
-            document_id=chunk.document_id,
-            source_type=chunk.source_type,
-            page_number=chunk.page_number,
-            start_char=start_char,
-            end_char=end_char,
-            exact_quote=exact_quote,
-            clause_number=chunk.clause_number,
-            relevance_score=relevance_score,
-        )
-
-    @staticmethod
-    def verify_evidence_provenance(evidence: EvidencePassage, full_document_text: str) -> bool:
-        """Verifies that the evidence passage exists verbatim in the document."""
-        return evidence.verify_verbatim(full_document_text)
+    def verify_provenance(evidence: Evidence, expected_source_id: str, expected_source_type: SourceType) -> bool:
+        """Ensure evidence item is strictly bound to the target document and source type."""
+        if evidence.source_id != expected_source_id:
+            return False
+        if evidence.source_type != expected_source_type.value:
+            return False
+        return True

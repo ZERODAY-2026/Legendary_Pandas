@@ -1,1 +1,1 @@
-"""Document processing, segmentation, chunking, and core data schemas."""
+"""Document structuring, section detection, schemas, and chunking."""

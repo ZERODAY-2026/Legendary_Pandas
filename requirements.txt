@@ -1,11 +1,30 @@
-# Pinned dependencies for Private Legal Triage Backend
+# Local-first Legal Document Triage System
+# Python 3.11 pinned dependencies
+
+# Core Web API & Validation
 fastapi==0.139.0
-uvicorn==0.49.0
+uvicorn[standard]==0.49.0
 pydantic==2.13.4
-pydantic-settings==2.16.0
-PyMuPDF==1.25.3
-rank-bm25==0.2.2
 python-multipart==0.0.32
+
+# Ingestion & PDF Extraction (local processing)
+pymupdf==1.25.3
+
+# LangChain (text splitters only — no remote LLM calls)
+langchain==0.3.25
+langchain-community==0.3.25
+
+# Local Embedding Model (BAAI/bge-small-en-v1.5 via sentence-transformers, CPU-safe)
+sentence-transformers==3.4.1
+torch==2.7.0
+
+# Vector Database (Qdrant, local persistent storage — no cloud API key)
+qdrant-client==1.14.3
+
+# Information Retrieval (BM25 sparse ranking, strictly local)
+rank-bm25==0.2.2
+
+# Testing & Quality
 pytest==9.1.1
-pytest-asyncio==1.4.0
+pytest-asyncio==0.24.0
 httpx==0.28.1

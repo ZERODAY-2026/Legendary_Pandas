@@ -1,107 +1,101 @@
-# Private Legal Triage
+# Private Legal Triage System
 
-> A local-first, evidence-grounded legal document triage system for rental agreements (PDF and TXT).
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python: 3.11](https://img.shields.io/badge/Python-3.11-brightgreen.svg)](.python-version)
+[![Node: 24](https://img.shields.io/badge/Node-24-green.svg)](.nvmrc)
+[![Local-Only: Zero Egress](https://img.shields.io/badge/Privacy-100%25%20Local-success.svg)](docs/privacy.md)
 
-Private Legal Triage is **not a general legal chatbot**. It ingests a residential tenancy agreement, extracts its text locally, identifies key clauses, answers user questions using verifiable verbatim evidence from the document, explains potential concerns, and explicitly reports when the document does not contain enough information.
+A local-first, evidence-grounded legal document triage system for rental agreements (leases). It is **not** a general legal chatbot. It extracts contract contents locally, identifies key clauses, answers questions using verifiable verbatim evidence from the document, flags ambiguities and potential legal concerns, and explicitly abstains when the contract does not contain enough information.
 
----
-
-## Hard Privacy & Architectural Constraints
-
-- **100% Local Execution**: All processing (parsing, chunking, retrieval indexing, prompt generation, Gemma inference, verification, and temporary files) stays strictly on the user's device.
-- **No Cloud Fallbacks**: No cloud LLM APIs, hosted vector databases, remote embeddings, cloud OCR, or telemetry beacons. If local inference fails, the system fails closed with a transparent error.
-- **Local Loopback Only**: The FastAPI server strictly binds to `127.0.0.1` and rejects remote network access.
-- **Content-Free Logs**: Logs never record document content, user questions, party names, or model answers.
-- **Source Separation**: Document sources are tagged at ingestion into three immutable types (`contract`, `legislation`, `court_judgment`). External law is never conflated with the uploaded contract.
-- **Untrusted Evidence**: Contract text is treated strictly as untrusted data within an isolated prompt envelope to prevent prompt injection.
-- **Deterministic Verification**: Every finding and citation is validated against the original text before display. Questions requiring definitive legal judgments trigger mandatory escalation to a legal professional.
+**Every byte of data stays on your local device.** Zero cloud LLM calls, hosted embeddings, telemetry, or remote storage.
 
 ---
 
-## Deterministic Rules Enforced on Every Finding
-
-1. **Explicit Statement**: Must be supported by a real verbatim passage from the source document.
-2. **Interpretation**: Must be explicitly labelled as an interpretation.
-3. **Missing Clause**: Must not be described as one that exists in the document.
-4. **Legal Concern**: Must never be a definitive finding of illegality or invalidity.
-5. **Source Separation**: Legislation and court judgments must never be cited as terms of the uploaded contract.
-6. **Insufficient Evidence**: If evidence is inadequate, the answer must state what could not be established.
+## Key Guarantees
+- **Strictly Local**: Bound strictly to `127.0.0.1`. No external APIs or telemetry.
+- **Verifiable Evidence**: Every factual claim requires a verbatim quote and exact character span from the original document.
+- **Honest Abstention**: When the contract is silent on a topic, the system states that it cannot establish the answer rather than fabricating one from general model knowledge.
+- **No Definitive Legal Rulings**: Never delivers definitive judgments of illegality. Questions regarding legal enforceability trigger an explicit limitation and escalation to a legal professional.
+- **Prompt Injection Defense**: Ingested document text is isolated inside `<UNTRUSTED_DOCUMENT_EVIDENCE>` blocks and treated as passive evidence, never as instructions.
 
 ---
 
-## Tech Stack & Hardware Requirements
-
-- **Backend**: Python 3.11, FastAPI, Pydantic v2, PyMuPDF (`fitz`), `rank-bm25`
-- **Frontend**: React 18, TypeScript, Vite, Vanilla CSS + Tailwind-free design system, restrictive CSP
-- **Model**: Gemma Edge variant (`gemma-2-2b-it` / `gemma-3n` Q4_K_M quantized GGUF)
-- **Host Specs**: CPU execution supported; ~16 GB RAM; 2-4 GB memory budget for Gemma runtime.
+## Tech Stack
+- **Backend**: Python 3.11, FastAPI (`127.0.0.1` only), Pydantic v2 schemas
+- **PDF Extraction**: PyMuPDF (`fitz`) with page tracking and exact character offsets
+- **Retrieval**: BM25 sparse ranking (strictly local; no external vector database)
+- **Local Model**: Google Gemma edge model (Gemma 3n E2B / E4B or quantized GGUF)
+- **Frontend**: React + TypeScript + Vite, local assets only, restrictive Content Security Policy
+- **Testing**: pytest (unit, integration, safety, privacy, adversarial)
 
 ---
 
 ## Repository Structure
 
 ```
-private-legal-triage/
-├── frontend/
+├── frontend/                     # React + TypeScript + Vite UI
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── api/
-│   │   └── types/schemas.ts
+│   │   ├── components/           # Document viewer, clause explorer, risk badges
+│   │   ├── pages/                # Workspace, Overview, Privacy Controls
+│   │   ├── api/                  # Local-only loopback API client
+│   │   └── types/                # TypeScript schemas mirroring backend
 │   └── package.json
 ├── backend/
 │   └── app/
-│       ├── main.py
-│       ├── config.py
-│       ├── api/
-│       ├── ingestion/
-│       ├── document/schemas.py
-│       ├── retrieval/
-│       ├── agent/
-│       ├── legal_sources/
-│       │   ├── registry.py
-│       │   └── provenance.py
-│       ├── safety/
-│       └── storage/
+│       ├── main.py               # FastAPI entry point (127.0.0.1)
+│       ├── config.py             # Local paths, loopback bindings, privacy flags
+│       ├── api/                  # REST endpoints (upload, overview, clauses, ask)
+│       ├── ingestion/            # PDF/TXT parsers, validator, normalizer
+│       ├── document/             # Section detector, exact-span chunker, schemas
+│       ├── retrieval/            # BM25 indexing, concept expansion, ranker
+│       ├── agent/                # Local Gemma runtime, hardened prompts, analyzer
+│       ├── legal_sources/        # Provenance boundary (contract vs statute)
+│       ├── safety/               # Verbatim quote & claim validators, response guard
+│       └── storage/              # SQLite session store & zero-trace cleanup
 ├── tests/
-│   ├── unit/
-│   ├── integration/
-│   ├── safety/
-│   ├── privacy/
-│   └── adversarial/
-├── evals/
-│   ├── questions.jsonl
-│   ├── expected_evidence.jsonl
-│   └── evaluate.py
-├── docs/
-│   ├── architecture.md
-│   ├── privacy.md
-│   ├── legal-source-policy.md
-│   ├── evaluation.md
-│   └── model-card.md
-├── data/sample_contracts/
-├── models/
-├── LICENSE
-└── requirements.txt
+│   ├── unit/                     # Schema, parsing, and chunking tests
+│   ├── integration/              # Pipeline ingestion & retrieval tests
+│   ├── safety/                   # Hallucination & quote verification tests
+│   ├── privacy/                  # Zero-egress network isolation tests
+│   └── adversarial/              # Document prompt-injection & malformed PDF tests
+├── evals/                        # Evaluation questions & benchmark runner
+├── docs/                         # Architecture, privacy threat model, policies
+├── data/sample_contracts/        # Synthetic rental agreements for testing
+└── models/                       # Local model weights directory (gitignored)
 ```
 
 ---
 
-## Quickstart
+## Getting Started
 
-### 1. Backend Setup
+### 1. Prerequisites
+- Python 3.11 (`python --version`)
+- Node.js 20+ (`node --version`)
+
+### 2. Backend Setup
 ```bash
-# Verify Python 3.11
-python --version
-
-# Install dependencies
-pip install -r requirements.txt
+# Install backend dependencies
+python -m pip install -r requirements.txt
 
 # Run test suite
 pytest
 ```
 
-### 2. Run Offline Benchmark Harness
+### 3. Running Backend Locally
 ```bash
-python evals/evaluate.py
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
 ```
+
+---
+
+## Documentation
+- [Architecture Overview](docs/architecture.md)
+- [Privacy Policy & Threat Model](docs/privacy.md)
+- [Legal Source Separation Policy](docs/legal-source-policy.md)
+- [Evaluation Benchmark](docs/evaluation.md)
+- [Model Card](docs/model-card.md)
+
+---
+
+## License
+MIT License. See [LICENSE](LICENSE) for details.

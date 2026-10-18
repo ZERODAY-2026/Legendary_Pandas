@@ -1,1 +1,1 @@
-"""Private Legal Triage Application Core."""
+"""Private Legal Triage Backend Application Package."""

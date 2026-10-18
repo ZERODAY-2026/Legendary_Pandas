@@ -1,1 +1,1 @@
-"""Test suite package for Private Legal Triage."""
+"""Root test package for private-legal-triage."""

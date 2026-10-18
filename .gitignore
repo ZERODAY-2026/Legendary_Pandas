@@ -1,24 +1,7 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
 
 # Virtual environments
 .venv/
@@ -26,44 +9,42 @@ venv/
 ENV/
 env/
 
-# Testing & Coverage
-.cache
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-*.cover
-nosetests.xml
-coverage.xml
+# Node & Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
 
-# Models (Local weights / GGUF / ONNX)
-models/*
-!models/.gitkeep
-
-# Private data & User uploads / Sessions
-data/private/*
-!data/private/.gitkeep
-temp/
-scratch/
-sessions/
+# SQLite and local storage
 *.sqlite
 *.sqlite3
 *.db
+backend/app/storage/data/
+storage/data/
+
+# Local models (strict local storage, excluded from git)
+models/
+*.gguf
+*.bin
+*.onnx
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs and environment variables
 *.log
-
-# Frontend (Node / Vite)
-frontend/node_modules/
-frontend/dist/
-frontend/.vite/
-node_modules/
-
-# Environment & IDE
 .env
 .env.*
-!.env.example
+
+# Private & session data
+data/private/
+temp/
+scratch/
+
+# IDE & OS files
 .vscode/
 .idea/
-*.swp
-*.swo
 .DS_Store
 Thumbs.db

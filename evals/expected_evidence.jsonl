@@ -1,5 +1,4 @@
-{"id": "q001", "expected_status": "sufficient_evidence", "expected_clause": "Clause 4", "keywords": ["$2,000", "security deposit"]}
-{"id": "q002", "expected_status": "sufficient_evidence", "expected_clause": "Clause 8", "keywords": ["60 days", "written notice"]}
-{"id": "q003", "expected_status": "sufficient_evidence", "expected_clause": "Clause 11", "keywords": ["pets", "written consent"]}
-{"id": "q004", "expected_status": "insufficient_evidence", "expected_clause": null, "keywords": []}
-{"id": "q005", "expected_status": "escalation_required", "expected_clause": "Clause 14", "keywords": ["legal counsel", "enforceability"]}
+{"id": "q1", "expected_source_type": "contract", "expected_keywords": ["security deposit", "$1,500", "due on signing"], "expected_finding_category": "obligation"}
+{"id": "q2", "expected_source_type": "contract", "expected_keywords": ["notice", "30 days", "written notice"], "expected_finding_category": "termination"}
+{"id": "q3", "expected_source_type": "contract", "expected_keywords": [], "expected_finding_category": "missing_information"}
+{"id": "q4", "expected_source_type": "contract", "expected_keywords": ["50%"], "expected_finding_category": "potential_legal_concern"}
